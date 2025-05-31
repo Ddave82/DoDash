@@ -201,7 +201,7 @@ const loadFromServer = async () => {
     return await response.json();
   } catch (error) {
     console.error('Error loading from server:', error);
-    return { lists: [], keyColor: '#6B46C1' };
+    return { lists: [] };
   }
 };
 
@@ -281,7 +281,7 @@ function App() {
   const activeList = lists.find(list => list.id === activeListId);
 
   return (
-    <ThemeProvider theme={{ keyColor: DEFAULT_COLOR }}>
+    <ThemeProvider theme={{}}>
       <GlobalStyle />
       <AppContainer>
         <Header>
