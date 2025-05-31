@@ -321,8 +321,7 @@ function App() {
                         l.id === list.id ? { ...l, name: newName.trim() } : l
                       );
                       const saved = await saveToServer({
-                        lists: newLists,
-                        keyColor
+                        lists: newLists
                       });
                       if (saved) {
                         setLists(newLists);
@@ -339,8 +338,7 @@ function App() {
                     if (window.confirm('Are you sure you want to delete this list?')) {
                       const newLists = lists.filter(l => l.id !== list.id);
                       const saved = await saveToServer({
-                        lists: newLists,
-                        keyColor
+                        lists: newLists
                       });
                       if (saved) {
                         setLists(newLists);
