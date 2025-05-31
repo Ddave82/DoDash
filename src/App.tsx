@@ -34,6 +34,7 @@ export interface Todo {
 export interface TodoListType {
   id: number;
   name: string;
+  color: string;
   todos: Todo[];
 }
 
@@ -98,13 +99,13 @@ const ListItem = styled.div`
   }
 `;
 
-const ListButton = styled.button<{ active: boolean; theme: { keyColor: string } }>`
+const ListButton = styled.button<{ active: boolean; color: string }>`
   flex: 1;
   padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 8px;
   background: ${props => props.active 
-    ? `linear-gradient(135deg, ${props.theme.keyColor} 0%, ${adjustColor(props.theme.keyColor, -20)} 100%)`
+    ? `linear-gradient(135deg, ${props.color} 0%, ${adjustColor(props.color, -20)} 100%)`
     : 'linear-gradient(135deg, #333 0%, #2a2a2a 100%)'};
   color: white;
   cursor: pointer;
@@ -172,9 +173,10 @@ const EmptyState = styled.div`
 `;
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const DEFAULT_COLOR = '#6B46C1';
 
 // Server data helper functions
-const saveToServer = async (data: { lists: TodoListType[], keyColor: string }) => {
+const saveToServer = async (data: { lists: TodoListType[] }): Promise<boolean> => {
   try {
     const response = await fetch(`${API_URL}/data`, {
       method: 'POST',
@@ -184,8 +186,11 @@ const saveToServer = async (data: { lists: TodoListType[], keyColor: string }) =
       body: JSON.stringify(data),
     });
     if (!response.ok) throw new Error('Failed to save data');
+    const result = await response.json();
+    return result.success === true;
   } catch (error) {
     console.error('Error saving to server:', error);
+    return false;
   }
 };
 
@@ -201,7 +206,6 @@ const loadFromServer = async () => {
 };
 
 function App() {
-  const [keyColor, setKeyColor] = useState('#6B46C1');
   const [lists, setLists] = useState<TodoListType[]>([]);
   const [activeListId, setActiveListId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -211,7 +215,6 @@ function App() {
     const loadInitialData = async () => {
       const data = await loadFromServer();
       setLists(data.lists);
-      setKeyColor(data.keyColor);
       
       // Automatically select the first list if there are any lists
       if (data.lists.length > 0) {
@@ -223,18 +226,7 @@ function App() {
     loadInitialData();
   }, []);
 
-  // Save data to server whenever it changes
-  useEffect(() => {
-    if (!isLoading) {
-      const saveData = async () => {
-        await saveToServer({
-          lists,
-          keyColor
-        });
-      };
-      saveData();
-    }
-  }, [lists, keyColor, isLoading]);
+
 
   // Poll for updates every 5 seconds
   useEffect(() => {
@@ -242,42 +234,58 @@ function App() {
       if (!isLoading) {
         const data = await loadFromServer();
         setLists(data.lists);
-        setKeyColor(data.keyColor);
       }
     }, 5000);
 
     return () => clearInterval(pollInterval);
   }, [isLoading]);
 
-  const addList = () => {
+  const addList = async () => {
     const name = prompt('Enter list name:');
     if (name) {
       const newList: TodoListType = {
         id: Date.now(),
         name,
+        color: DEFAULT_COLOR,
         todos: []
       };
-      setLists([...lists, newList]);
+      const newLists = [...lists, newList];
+      const saved = await saveToServer({
+        lists: newLists
+      });
+      if (saved) {
+        setLists(newLists);
+        setActiveListId(newList.id);
+      } else {
+        alert('Failed to save list. Please try again.');
+      }
     }
   };
 
-  const updateTodos = (updatedTodos: Todo[]) => {
-    setLists(lists.map(list =>
+  const updateTodos = async (updatedTodos: Todo[]) => {
+    const newLists = lists.map(list =>
       list.id === activeListId
         ? { ...list, todos: updatedTodos }
         : list
-    ));
+    );
+    const saved = await saveToServer({
+      lists: newLists
+    });
+    if (saved) {
+      setLists(newLists);
+    } else {
+      alert('Failed to save changes. Please try again.');
+    }
   };
 
   const activeList = lists.find(list => list.id === activeListId);
 
   return (
-    <ThemeProvider theme={{ keyColor }}>
+    <ThemeProvider theme={{ keyColor: DEFAULT_COLOR }}>
       <GlobalStyle />
       <AppContainer>
         <Header>
           <h1>DoDash</h1>
-          <ColorPicker color={keyColor} onChange={setKeyColor} />
         </Header>
         
         <ListSelector>
@@ -285,29 +293,62 @@ function App() {
             <ListItem key={list.id}>
               <ListButton
                 active={list.id === activeListId}
+                color={list.color}
                 onClick={() => setActiveListId(list.id)}
               >
                 {list.name}
               </ListButton>
               <ListActions>
+                <ColorPicker
+                  color={list.color}
+                  onChange={async (newColor) => {
+                    const newLists = lists.map(l =>
+                      l.id === list.id ? { ...l, color: newColor } : l
+                    );
+                    const saved = await saveToServer({ lists: newLists });
+                    if (saved) {
+                      setLists(newLists);
+                    } else {
+                      alert('Failed to change list color. Please try again.');
+                    }
+                  }}
+                />
                 <ActionButton
-                  onClick={() => {
+                  onClick={async () => {
                     const newName = prompt('Enter new list name:', list.name);
                     if (newName?.trim()) {
-                      setLists(lists.map(l =>
+                      const newLists = lists.map(l =>
                         l.id === list.id ? { ...l, name: newName.trim() } : l
-                      ));
+                      );
+                      const saved = await saveToServer({
+                        lists: newLists,
+                        keyColor
+                      });
+                      if (saved) {
+                        setLists(newLists);
+                      } else {
+                        alert('Failed to rename list. Please try again.');
+                      }
                     }
                   }}
                 >
                   ✎
                 </ActionButton>
                 <ActionButton
-                  onClick={() => {
+                  onClick={async () => {
                     if (window.confirm('Are you sure you want to delete this list?')) {
-                      setLists(lists.filter(l => l.id !== list.id));
-                      if (activeListId === list.id) {
-                        setActiveListId(lists.length > 1 ? lists[0].id : null);
+                      const newLists = lists.filter(l => l.id !== list.id);
+                      const saved = await saveToServer({
+                        lists: newLists,
+                        keyColor
+                      });
+                      if (saved) {
+                        setLists(newLists);
+                        if (activeListId === list.id) {
+                          setActiveListId(newLists.length > 0 ? newLists[0].id : null);
+                        }
+                      } else {
+                        alert('Failed to delete list. Please try again.');
                       }
                     }
                   }}
@@ -317,7 +358,7 @@ function App() {
               </ListActions>
             </ListItem>
           ))}
-          <AddListButton active={false} onClick={addList}>
+          <AddListButton active={false} color={DEFAULT_COLOR} onClick={addList}>
             + New List
           </AddListButton>
         </ListSelector>
@@ -332,6 +373,7 @@ function App() {
         ) : activeList ? (
           <TodoList
             todos={activeList.todos}
+            color={activeList.color}
             onUpdateTodos={updateTodos}
           />
         ) : (

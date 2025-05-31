@@ -27,6 +27,7 @@ const adjustColor = (color: string, amount: number): string => {
 interface Props {
   todos: Todo[];
   onUpdateTodos: (todos: Todo[]) => void;
+  color: string;
 }
 
 const Container = styled.div`
@@ -75,11 +76,11 @@ const Input = styled.input`
   }
 `;
 
-const Button = styled.button<{ theme: { keyColor: string } }>`
+const Button = styled.button<{ color: string }>`
   padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 8px;
-  background: ${props => `linear-gradient(135deg, ${props.theme.keyColor} 0%, ${adjustColor(props.theme.keyColor, -20)} 100%)`};
+  background: ${props => `linear-gradient(135deg, ${props.color} 0%, ${adjustColor(props.color, -20)} 100%)`};
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -120,7 +121,7 @@ const TodoItem = styled.div<{ completed: boolean }>`
   `}
 `;
 
-const Checkbox = styled.input.attrs({ type: 'checkbox' })<{ theme: { keyColor: string } }>`
+const Checkbox = styled.input.attrs({ type: 'checkbox' })<{ color: string }>`
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
@@ -128,7 +129,7 @@ const Checkbox = styled.input.attrs({ type: 'checkbox' })<{ theme: { keyColor: s
   margin: 0;
   
   &:checked {
-    accent-color: ${props => props.theme.keyColor};
+    accent-color: ${props => props.color};
   }
   
   &:hover {
@@ -157,7 +158,7 @@ const ClearButton = styled(Button)`
   margin-top: 1rem;
 `;
 
-const TodoList: React.FC<Props> = ({ todos, onUpdateTodos }) => {
+const TodoList: React.FC<Props> = ({ todos, onUpdateTodos, color }) => {
   const [newTodo, setNewTodo] = useState('');
   
   const activeTodos = todos.filter(todo => !todo.completed);
@@ -203,7 +204,7 @@ const TodoList: React.FC<Props> = ({ todos, onUpdateTodos }) => {
               onChange={(e) => setNewTodo(e.target.value)}
               placeholder="Add a new task..."
             />
-            <Button type="submit">Add Task</Button>
+            <Button type="submit" color={color}>Add Task</Button>
           </TodoInput>
         </form>
 
@@ -213,6 +214,7 @@ const TodoList: React.FC<Props> = ({ todos, onUpdateTodos }) => {
               <Checkbox
                 checked={todo.completed}
                 onChange={() => toggleTodo(todo.id)}
+                color={color}
               />
               <TodoText>{todo.text}</TodoText>
               <DeleteButton onClick={() => deleteTodo(todo.id)}>×</DeleteButton>
@@ -229,12 +231,13 @@ const TodoList: React.FC<Props> = ({ todos, onUpdateTodos }) => {
               <Checkbox
                 checked={todo.completed}
                 onChange={() => toggleTodo(todo.id)}
+                color={color}
               />
               <TodoText>{todo.text}</TodoText>
               <DeleteButton onClick={() => deleteTodo(todo.id)}>×</DeleteButton>
             </TodoItem>
           ))}
-          <ClearButton onClick={clearCompleted}>
+          <ClearButton onClick={clearCompleted} color="#ff6b6b">
             Clear Completed
           </ClearButton>
         </Section>
