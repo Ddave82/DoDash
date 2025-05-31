@@ -1,33 +1,27 @@
 version: '3.8'
 services:
-  client:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.frontend
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
-      - CHOKIDAR_USEPOLLING=true
-      - REACT_APP_API_URL=http://server:3001/api
-      - WDS_SOCKET_PORT=0
+      - REACT_APP_API_URL=http://localhost:3001/api
     depends_on:
-      - server
+      - backend
 
-  server:
+  backend:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.backend
     ports:
       - "3001:3001"
     volumes:
-      - ./server:/app
-      - ./server/data.json:/app/data.json
+      - ./data:/app/data
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
+      - PORT=3001
 
-networks:
-  default:
-    driver: bridge
+volumes:
+  data:

@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY server/package*.json ./
+RUN npm install
+
+# Copy server code
+COPY server/ ./
+
+# Create data directory
+RUN mkdir -p /app/data
+RUN echo '{"lists":[],"keyColor":"#6B46C1"}' > /app/data/data.json
+
+EXPOSE 3001
+CMD ["node", "server.js"]

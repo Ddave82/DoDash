@@ -236,12 +236,18 @@ function App() {
     }
   }, [lists, keyColor, isLoading]);
 
-  // Save activeListId to localStorage (this doesn't need to be synced)
+  // Poll for updates every 5 seconds
   useEffect(() => {
-    if (activeListId !== null) {
-      localStorage.setItem('dodash_active_list', JSON.stringify(activeListId));
-    }
-  }, [activeListId]);
+    const pollInterval = setInterval(async () => {
+      if (!isLoading) {
+        const data = await loadFromServer();
+        setLists(data.lists);
+        setKeyColor(data.keyColor);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [isLoading]);
 
   const addList = () => {
     const name = prompt('Enter list name:');
