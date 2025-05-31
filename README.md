@@ -2,6 +2,8 @@
 
 A minimalistic, dark-themed to-do list app – built for Docker and Unraid, but works everywhere.
 
+![DoDash Screenshot](assets/Screenshot.png)
+
 ## ✨ Features
 
 - Dark mode design
