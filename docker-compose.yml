@@ -11,6 +11,8 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_URL=http://server:3001/api
+      - WDS_SOCKET_PORT=0
     depends_on:
       - server
 
@@ -22,4 +24,10 @@ services:
       - "3001:3001"
     volumes:
       - ./server:/app
-      - /app/node_modules
+      - ./server/data.json:/app/data.json
+    environment:
+      - NODE_ENV=development
+
+networks:
+  default:
+    driver: bridge

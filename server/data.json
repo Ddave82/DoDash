@@ -1,17 +1,23 @@
 {
   "lists": [
     {
-      "id": 1748654008394,
-      "name": "hjnmk",
+      "id": 1748654931421,
+      "name": "Einkaufsliste",
       "todos": [
         {
-          "id": 1748654012879,
-          "text": "nm,",
-          "completed": true
-        },
+          "id": 1748654937174,
+          "text": "Klopapier",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": 1748654941473,
+      "name": "Privat",
+      "todos": [
         {
-          "id": 1748654035345,
-          "text": "erre",
+          "id": 1748654954304,
+          "text": "BackUp Proxmox neu einrichten",
           "completed": false
         }
       ]
