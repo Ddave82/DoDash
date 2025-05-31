@@ -250,9 +250,7 @@ function App() {
         todos: []
       };
       const newLists = [...lists, newList];
-      const saved = await saveToServer({
-        lists: newLists
-      });
+      const saved = await saveToServer({ lists: newLists });
       if (saved) {
         setLists(newLists);
         setActiveListId(newList.id);
@@ -320,9 +318,7 @@ function App() {
                       const newLists = lists.map(l =>
                         l.id === list.id ? { ...l, name: newName.trim() } : l
                       );
-                      const saved = await saveToServer({
-                        lists: newLists
-                      });
+                      const saved = await saveToServer({ lists: newLists });
                       if (saved) {
                         setLists(newLists);
                       } else {
@@ -337,9 +333,7 @@ function App() {
                   onClick={async () => {
                     if (window.confirm('Are you sure you want to delete this list?')) {
                       const newLists = lists.filter(l => l.id !== list.id);
-                      const saved = await saveToServer({
-                        lists: newLists
-                      });
+                      const saved = await saveToServer({ lists: newLists });
                       if (saved) {
                         setLists(newLists);
                         if (activeListId === list.id) {
