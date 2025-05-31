@@ -1,1 +1,10 @@
-{"lists":[]}
+{
+  "lists": [
+    {
+      "id": 1748681867177,
+      "name": "Einkaufsliste",
+      "color": "#6B46C1",
+      "todos": []
+    }
+  ]
+}

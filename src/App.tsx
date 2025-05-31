@@ -266,9 +266,7 @@ function App() {
         ? { ...list, todos: updatedTodos }
         : list
     );
-    const saved = await saveToServer({
-      lists: newLists
-    });
+    const saved = await saveToServer({ lists: newLists });
     if (saved) {
       setLists(newLists);
     } else {
