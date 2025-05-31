@@ -171,58 +171,77 @@ const EmptyState = styled.div`
   }
 `;
 
-// Local storage keys
-const STORAGE_KEYS = {
-  LISTS: 'dodash_lists',
-  ACTIVE_LIST: 'dodash_active_list',
-  KEY_COLOR: 'dodash_key_color'
-} as const;
+const API_URL = 'http://localhost:3001/api';
 
-// Local storage helper functions
-const saveToLocalStorage = (key: string, data: any) => {
+// Server data helper functions
+const saveToServer = async (data: { lists: TodoListType[], keyColor: string }) => {
   try {
-    localStorage.setItem(key, JSON.stringify(data));
+    const response = await fetch(`${API_URL}/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to save data');
   } catch (error) {
-    console.error(`Error saving to localStorage:`, error);
+    console.error('Error saving to server:', error);
   }
 };
 
-const loadFromLocalStorage = <T,>(key: string, defaultValue: T): T => {
+const loadFromServer = async () => {
   try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    const response = await fetch(`${API_URL}/data`);
+    if (!response.ok) throw new Error('Failed to load data');
+    return await response.json();
   } catch (error) {
-    console.error(`Error loading from localStorage:`, error);
-    return defaultValue;
+    console.error('Error loading from server:', error);
+    return { lists: [], keyColor: '#6B46C1' };
   }
 };
 
 function App() {
-  // Initialize state from localStorage
-  const [keyColor, setKeyColor] = useState(() => 
-    loadFromLocalStorage(STORAGE_KEYS.KEY_COLOR, '#6B46C1')
-  );
-  
-  const [lists, setLists] = useState<TodoListType[]>(() => 
-    loadFromLocalStorage(STORAGE_KEYS.LISTS, [])
-  );
-  
-  const [activeListId, setActiveListId] = useState<number | null>(() => 
-    loadFromLocalStorage(STORAGE_KEYS.ACTIVE_LIST, null)
-  );
+  const [keyColor, setKeyColor] = useState('#6B46C1');
+  const [lists, setLists] = useState<TodoListType[]>([]);
+  const [activeListId, setActiveListId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save to localStorage whenever data changes
+  // Load initial data from server
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.LISTS, lists);
-  }, [lists]);
+    const loadInitialData = async () => {
+      const data = await loadFromServer();
+      setLists(data.lists);
+      setKeyColor(data.keyColor);
+      
+      // Automatically select the first list if there are any lists
+      if (data.lists.length > 0) {
+        setActiveListId(data.lists[0].id);
+      }
+      
+      setIsLoading(false);
+    };
+    loadInitialData();
+  }, []);
 
+  // Save data to server whenever it changes
   useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.ACTIVE_LIST, activeListId);
+    if (!isLoading) {
+      const saveData = async () => {
+        await saveToServer({
+          lists,
+          keyColor
+        });
+      };
+      saveData();
+    }
+  }, [lists, keyColor, isLoading]);
+
+  // Save activeListId to localStorage (this doesn't need to be synced)
+  useEffect(() => {
+    if (activeListId !== null) {
+      localStorage.setItem('dodash_active_list', JSON.stringify(activeListId));
+    }
   }, [activeListId]);
-
-  useEffect(() => {
-    saveToLocalStorage(STORAGE_KEYS.KEY_COLOR, keyColor);
-  }, [keyColor]);
 
   const addList = () => {
     const name = prompt('Enter list name:');
