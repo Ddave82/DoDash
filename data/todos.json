@@ -1,0 +1,41 @@
+{
+  "lists": [
+    {
+      "id": "default",
+      "name": "Shopping List",
+      "color": "#5abb8b",
+      "tasks": [
+        {
+          "id": "task-1748887808376",
+          "text": "Snacks",
+          "completed": false,
+          "order": 0
+        },
+        {
+          "id": "task-1748887811197",
+          "text": "Beer",
+          "completed": false,
+          "order": 1
+        },
+        {
+          "id": "task-1748887846105",
+          "text": "Pizza",
+          "completed": true,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "id": "list-1748885757590",
+      "name": "Privat",
+      "color": "#723bf0",
+      "tasks": []
+    },
+    {
+      "id": "list-1748895163153",
+      "name": "Projects",
+      "color": "#8B5CF6",
+      "tasks": []
+    }
+  ]
+}

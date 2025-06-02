@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+
+# Build output
+/build
+/dist
+/.next
+*.tsbuildinfo
+
+# Mac
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Docker
+data/
+docker/data/
+*.pid
+
+# VSCode & IDEs
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Optional: static build outputs
+public/static
+public/assets/*.tmp
+
+# Test coverage
+coverage/
