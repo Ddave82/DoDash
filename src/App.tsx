@@ -14,7 +14,7 @@ function App() {
     fetchData();
   }, []);
 
-  const fetchData = async (retries = 3) => {
+  const fetchData = async (retries = 3): Promise<void> => {
     try {
       const response = await fetch('/api/data');
       if (!response.ok) {
@@ -35,7 +35,7 @@ function App() {
     }
   };
 
-  const saveData = async (newData: AppData, retries = 3) => {
+  const saveData = async (newData: AppData, retries = 3): Promise<void> => {
     try {
       const response = await fetch('/api/data', {
         method: 'POST',
