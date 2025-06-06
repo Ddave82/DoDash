@@ -14,28 +14,51 @@ function App() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (retries = 3) => {
     try {
       const response = await fetch('/api/data');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const jsonData = await response.json();
       setData(jsonData);
       setActiveListId(jsonData.lists[0]?.id || '');
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      if (retries > 0) {
+        console.log(`Retrying fetch... (${retries} attempts left)`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchData(retries - 1);
+      }
       setLoading(false);
     }
   };
 
-  const saveData = async (newData: AppData) => {
+  const saveData = async (newData: AppData, retries = 3) => {
     try {
-      await fetch('/api/data', {
+      const response = await fetch('/api/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error('Save operation failed');
+      }
     } catch (error) {
       console.error('Failed to save data:', error);
+      if (retries > 0) {
+        console.log(`Retrying save... (${retries} attempts left)`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return saveData(newData, retries - 1);
+      }
+      throw error;
     }
   };
 
