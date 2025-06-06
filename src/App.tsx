@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { AppData, TodoList, Task } from './types';
+import { AppData, TodoList } from './types';
 import ListSelector from './components/ListSelector';
 import TaskList from './components/TaskList';
 import AddListButton from './components/AddListButton';
