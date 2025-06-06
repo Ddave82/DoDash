@@ -6,28 +6,38 @@ const app = express();
 const PORT = 8080;
 const DATA_FILE = path.join(__dirname, '../data/todos.json');
 
-// Ensure data file exists
+// Ensure data directory and file exists with proper permissions
 async function initDataFile() {
   try {
-    await fs.access(DATA_FILE);
-    const data = await fs.readFile(DATA_FILE, 'utf8');
+    // Ensure data directory exists
+    const dataDir = path.dirname(DATA_FILE);
+    await fs.mkdir(dataDir, { recursive: true });
+    
     try {
-      JSON.parse(data);
-    } catch {
-      throw new Error('Invalid JSON');
+      await fs.access(DATA_FILE);
+      const data = await fs.readFile(DATA_FILE, 'utf8');
+      try {
+        JSON.parse(data);
+        console.log('Existing data file is valid');
+      } catch {
+        throw new Error('Invalid JSON');
+      }
+    } catch (error) {
+      console.log('Creating new data file...');
+      const initialData = {
+        lists: [{
+          id: 'default',
+          name: 'My Tasks',
+          color: '#8B5CF6',
+          tasks: []
+        }]
+      };
+      await fs.writeFile(DATA_FILE, JSON.stringify(initialData, null, 2));
+      console.log('Created new data file with initial content');
     }
-  } catch {
-    const initialData = {
-      lists: [{
-        id: 'default',
-        name: 'My Tasks',
-        color: '#8B5CF6',
-        tasks: []
-      }]
-    };
-    await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-    await fs.writeFile(DATA_FILE, JSON.stringify(initialData, null, 2));
-    console.log('Created new data file with initial content');
+  } catch (error) {
+    console.error('Failed to initialize data file:', error);
+    throw error;
   }
 }
 
@@ -50,14 +60,25 @@ app.post('/api/data', async (req, res) => {
   try {
     const newData = req.body;
     if (!newData || !newData.lists) {
-      throw new Error('Invalid data format');
+      return res.status(400).json({ error: 'Invalid data format', success: false });
     }
-    await fs.writeFile(DATA_FILE, JSON.stringify(newData, null, 2));
+
+    // Ensure data directory exists
+    const dataDir = path.dirname(DATA_FILE);
+    await fs.mkdir(dataDir, { recursive: true });
+
+    // Write data to temporary file first
+    const tempFile = `${DATA_FILE}.tmp`;
+    await fs.writeFile(tempFile, JSON.stringify(newData, null, 2));
+
+    // Rename temporary file to actual file (atomic operation)
+    await fs.rename(tempFile, DATA_FILE);
+
     console.log('Data saved successfully');
     res.json({ success: true });
   } catch (error) {
     console.error('Error saving data:', error);
-    res.status(500).json({ error: 'Failed to save data' });
+    res.status(500).json({ error: 'Failed to save data: ' + error.message, success: false });
   }
 });
 
