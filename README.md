@@ -71,8 +71,8 @@ dodash/
 
 ### 1. **Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/dodash.git
-cd dodash
+git clone https://github.com/Ddave82/DoDash.git
+cd DoDash
 ```
 
 ### 2. **Install Dependencies**
@@ -82,11 +82,16 @@ npm install
 
 ### 3. **Start in Development**
 - **Backend:**  
-  `npm run server`
+  ```bash
+  cd server
+  node index.js
+  ```
 - **Frontend:** *(in a new terminal)*  
-  `npm run dev`
+  ```bash
+  npm start
+  ```
 
-App runs at: [http://localhost:3000](http://localhost:3000)
+App runs at: [http://localhost:8080](http://localhost:8080)
 
 ---
 
@@ -162,9 +167,3 @@ Contributions are welcome! Open an issue or submit a PR—feedback and improveme
 
 **Ready to get things done?**  
 Star the repo, run DoDash in your LAN, and enjoy next-level productivity—*beautifully simple, 100% yours.*
-
----
-
-**Tipp:**  
-Nach dem Push zu GitHub kannst du die [Repository Description] und das `topics`-Feld im GitHub-Repo noch ausfüllen für bessere Auffindbarkeit.  
-Wenn du willst, helfe ich auch gern noch beim ersten Push oder mit einer hübschen Repository-Beschreibung auf GitHub! Sag einfach Bescheid.
